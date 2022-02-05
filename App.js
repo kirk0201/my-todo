@@ -15,7 +15,6 @@ export default function App() {
   const [working, setWorking] = useState({
     onWork: false,
     onTrav: false,
-    nothing: true,
   });
   const [text, setText] = useState("");
   const [toDos, setToDos] = useState([]);
@@ -36,7 +35,7 @@ export default function App() {
     if (text === "") {
       return;
     }
-    setToDos([...toDos, { id: Date.now(), text, work: working }]);
+    setToDos([...toDos, { id: Date.now(), text, working }]);
     setText("");
   };
 
@@ -88,38 +87,17 @@ export default function App() {
           style={styles.input}
         />
       </View>
-      <ScrollView style={{ flexDirection: "column" }}>
-        {working.nothing ? (
-          <View style={{ ...styles.contentscontainer, display: "none" }}></View>
-        ) : working.onWork ? (
-          toDos
-            .filter((toDo) => toDo.work.onWork === true)
-            .map((workToDo, index) => (
-              <View style={styles.contentsContainer} key={workToDo.id}>
-                <View style={styles.rowContents}>
-                  <Text style={styles.contentsIndex}>{index + 1}.</Text>
-                  <Text style={styles.contentsText}>{workToDo.text}</Text>
-                  <TouchableOpacity onPress={() => remove(workToDo.id)}>
-                    <AntDesign name="close" size={24} color="black" />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))
-        ) : (
-          toDos
-            .filter((toDo) => toDo.work.onTrav === true)
-            .map((workToDo, index) => (
-              <View style={styles.contentsContainer} key={workToDo.id}>
-                <View style={styles.rowContents}>
-                  <Text style={styles.contentsIndex}>{index + 1}.</Text>
-                  <Text style={styles.contentsText}>{workToDo.text}</Text>
-                  <TouchableOpacity onPress={() => remove(workToDo.id)}>
-                    <AntDesign name="close" size={24} color="black" />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))
-        )}
+      <ScrollView>
+        {toDos
+          .filter((toDo) => toDo.working.onWork && working.onWork)
+          .map((toDo) => (
+            <Title toDo={toDo} remove={remove} />
+          ))}
+        {toDos
+          .filter((toDo) => toDo.working.onTrav && working.onTrav)
+          .map((toDo) => (
+            <Title toDo={toDo} remove={remove} />
+          ))}
       </ScrollView>
     </View>
   );
