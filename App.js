@@ -10,6 +10,9 @@ import {
   ScrollView,
 } from "react-native";
 import { theme } from "./color";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const STORAGE_KEY = "@todos";
 
 export default function App() {
   const [working, setWorking] = useState({
@@ -18,6 +21,10 @@ export default function App() {
   });
   const [text, setText] = useState("");
   const [toDos, setToDos] = useState([]);
+
+  useEffect(() => {
+    loadToDo();
+  }, []);
 
   const work = () => {
     setWorking({ ...working, onWork: true, onTrav: false, nothing: false });
@@ -31,16 +38,31 @@ export default function App() {
     setText(e);
   };
 
-  const addToDo = () => {
+  const saveToDo = async (toDos) => {
+    const objStr = JSON.stringify(toDos);
+    await AsyncStorage.setItem(STORAGE_KEY, objStr);
+  };
+
+  const loadToDo = async () => {
+    const getToDo = await AsyncStorage.getItem(STORAGE_KEY);
+    const strObj = JSON.parse(getToDo);
+    setToDos(strObj);
+  };
+
+  const addToDo = async () => {
     if (text === "") {
       return;
     }
-    setToDos([...toDos, { id: Date.now(), text, working }]);
+    const newToDo = [...toDos, { id: Date.now(), text, working }];
+    setToDos(newToDo);
+    await saveToDo(newToDo);
     setText("");
   };
 
-  function remove(id) {
-    setToDos(toDos.filter((toDo) => id !== toDo.id));
+  async function remove(id) {
+    const rm = toDos.filter((toDo) => id !== toDo.id);
+    setToDos(rm);
+    await saveToDo(rm);
   }
   console.log("---------------------------------------");
   console.log(working);
@@ -126,28 +148,5 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginTop: 20,
     fontSize: 18,
-  },
-  contentsContainer: {
-    backgroundColor: theme.white,
-    marginTop: 20,
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    borderRadius: 20,
-    flexDirection: "column-reverse",
-  },
-  rowContents: {
-    height: 40,
-    alignItems: "center",
-    flexDirection: "row",
-  },
-  contentsIndex: {
-    flex: 0.5,
-    fontSize: 13,
-    color: theme.grey,
-  },
-  contentsText: {
-    flex: 9,
-    fontSize: 20,
-    fontWeight: "600",
   },
 });
