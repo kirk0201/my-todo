@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { AntDesign } from "@expo/vector-icons";
 import {
   StyleSheet,
@@ -7,6 +7,7 @@ import {
   View,
   TouchableOpacity,
   TextInput,
+  ScrollView,
 } from "react-native";
 import { theme } from "./color";
 
@@ -19,52 +20,37 @@ export default function App() {
   const [text, setText] = useState("");
   const [toDos, setToDos] = useState([]);
 
-  const work = useCallback(() => {
+  const work = () => {
     setWorking({ ...working, onWork: true, onTrav: false, nothing: false });
-  }, [working]);
+  };
 
-  const travel = useCallback(() => {
+  const travel = () => {
     setWorking({ ...working, onTrav: true, onWork: false, nothing: false });
-  }, [working]);
+  };
 
-  const onChangeText = useCallback(
-    (e) => {
-      setText(e);
-    },
-    [text]
-  );
+  const onChangeText = (e) => {
+    setText(e);
+  };
 
-  const addToDo = useCallback(() => {
+  const addToDo = () => {
     if (text === "") {
       return;
     }
     setToDos([...toDos, { id: Date.now(), text, work: working }]);
     setText("");
-  }, [text]);
-
-  const nothingToDo = () => {
-    setWorking({ ...working, nothing: true, onWork: false, onTrav: false });
   };
 
-  // const test = (id) => console.log(id);
-
   function remove(id) {
-    // console.log(id);
-    // console.log(
-    //   ...toDos,
-    //   toDos.filter((toDo) => id !== toDo.id)
-    // );
-    setToDos([toDos.filter((toDo) => id !== toDo.id)]);
+    setToDos(toDos.filter((toDo) => id !== toDo.id));
   }
   console.log("---------------------------------------");
   console.log(working);
   console.log(toDos);
 
-  // useEffect(() => {}, [toDos]);
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity underlayColor="#ddd" onPress={work}>
+        <TouchableOpacity onPress={work}>
           <Text
             style={{
               ...styles.title,
@@ -102,39 +88,17 @@ export default function App() {
           style={styles.input}
         />
       </View>
-      <View style={{ flexDirection: "column-reverse" }}>
+      <ScrollView style={{ flexDirection: "column" }}>
         {working.nothing ? (
           <View style={{ ...styles.contentscontainer, display: "none" }}></View>
         ) : working.onWork ? (
           toDos
             .filter((toDo) => toDo.work.onWork === true)
             .map((workToDo, index) => (
-              <View style={styles.contentscontainer} key={workToDo.id}>
-                <View
-                  style={{
-                    height: 40,
-                    alignItems: "center",
-                    flexDirection: "row",
-                  }}
-                >
-                  <Text
-                    style={{
-                      flex: 0.5,
-                      fontSize: 13,
-                      color: theme.grey,
-                    }}
-                  >
-                    {index + 1}.
-                  </Text>
-                  <Text
-                    style={{
-                      flex: 9,
-                      fontSize: 20,
-                      fontWeight: "600",
-                    }}
-                  >
-                    {workToDo.text}
-                  </Text>
+              <View style={styles.contentsContainer} key={workToDo.id}>
+                <View style={styles.rowContents}>
+                  <Text style={styles.contentsIndex}>{index + 1}.</Text>
+                  <Text style={styles.contentsText}>{workToDo.text}</Text>
                   <TouchableOpacity onPress={() => remove(workToDo.id)}>
                     <AntDesign name="close" size={24} color="black" />
                   </TouchableOpacity>
@@ -145,32 +109,10 @@ export default function App() {
           toDos
             .filter((toDo) => toDo.work.onTrav === true)
             .map((workToDo, index) => (
-              <View style={styles.contentscontainer} key={workToDo.id}>
-                <View
-                  style={{
-                    height: 40,
-                    alignItems: "center",
-                    flexDirection: "row",
-                  }}
-                >
-                  <Text
-                    style={{
-                      flex: 0.5,
-                      fontSize: 13,
-                      color: theme.grey,
-                    }}
-                  >
-                    {index + 1}.
-                  </Text>
-                  <Text
-                    style={{
-                      flex: 9,
-                      fontSize: 20,
-                      fontWeight: "600",
-                    }}
-                  >
-                    {workToDo.text}
-                  </Text>
+              <View style={styles.contentsContainer} key={workToDo.id}>
+                <View style={styles.rowContents}>
+                  <Text style={styles.contentsIndex}>{index + 1}.</Text>
+                  <Text style={styles.contentsText}>{workToDo.text}</Text>
                   <TouchableOpacity onPress={() => remove(workToDo.id)}>
                     <AntDesign name="close" size={24} color="black" />
                   </TouchableOpacity>
@@ -178,7 +120,7 @@ export default function App() {
               </View>
             ))
         )}
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -207,7 +149,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 18,
   },
-  contentscontainer: {
+  contentsContainer: {
     backgroundColor: theme.white,
     marginTop: 20,
     paddingHorizontal: 20,
@@ -215,7 +157,19 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     flexDirection: "column-reverse",
   },
+  rowContents: {
+    height: 40,
+    alignItems: "center",
+    flexDirection: "row",
+  },
+  contentsIndex: {
+    flex: 0.5,
+    fontSize: 13,
+    color: theme.grey,
+  },
   contentsText: {
-    color: "black",
+    flex: 9,
+    fontSize: 20,
+    fontWeight: "600",
   },
 });
